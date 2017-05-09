@@ -109,23 +109,27 @@ private:
 
 public:
     explicit List() : first(), last() { }
-/*
-    explicit
-    List(size_type _size, value_type init = 0) noexcept
-    {
-        if(init == 0){
+    
+    explicit List(size_type _size) noexcept
+        : List(_size, value_type{} ) { }
 
+    explicit List(size_type _size, value_type init) noexcept
+    {
+        if(_size == 0){
+            first = last = nullptr;
         } else {
+            first = new node(init);
             node* curr = first;
             curr->next = new node(init);
-            for(size_type i = 0; i <= _size; ++i) {
+            for(size_type i = 0; i < _size; ++i) {
                 curr->next = new node(init);
                 auto tmp = curr;
                 curr = curr->next;
                 curr->prev = tmp;
             }
+            last = curr;
         }
-    }*/
+    }
 
     void push_back(T x)
     {
