@@ -107,13 +107,12 @@ private:
     node* last;
     size_type _size = 0;
 
-public:
+public:    
     explicit List() : first(), last() { }
-    
-    explicit List(size_type _size) noexcept
-        : List(_size, value_type{} ) { }
 
-    explicit List(size_type _size, value_type init) noexcept
+    explicit List(size_type _size) noexcept : List(_size, value_type{} ) { }
+
+    explicit List(size_type _size, value_type init) noexcept : _size(_size)
     {
         if(_size == 0){
             first = last = nullptr;
@@ -133,6 +132,7 @@ public:
 
     void push_back(T x)
     {
+        ++_size;
         if(first == nullptr){
             first = new node(x);
             last = first;
