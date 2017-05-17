@@ -26,27 +26,27 @@ namespace detail
         using difference_type   = ptrdiff_t;
         using self              = List_iterator<T>;
 
-        node* _node;
+        node* node_;
 
-        explicit List_iterator() : _node() { }
-        explicit List_iterator(node* _node) : _node(_node) { }
+        explicit List_iterator() : node_() { }
+        explicit List_iterator(node* node_) : node_(node_) { }
 
         reference
         operator*() const noexcept
         {
-            return _node->data;
+            return node_->data;
         }
 
         pointer
         operator->() const noexcept
         {
-            return &_node->data;
+            return &node_->data;
         }
 
         self&
         operator++() noexcept
         {
-            _node = _node->next;
+            node_ = node_->next;
             return *this;
         }
 
@@ -54,14 +54,14 @@ namespace detail
         operator++(int) noexcept
         {
             self tmp = *this;
-            _node = _node->next;
+            node_ = node_->next;
             return tmp;
         }
 
         self&
         operator--() noexcept
         {
-            _node = _node->prev;
+            node_ = node_->prev;
             return *this;
         }
 
@@ -69,20 +69,20 @@ namespace detail
         operator--(int) noexcept
         {
             self tmp = *this;
-            _node = _node->prev;
+            node_ = node_->prev;
             return tmp;
         }
 
         friend bool
         operator==(const self& lhs, const self& rhs) noexcept
         {
-            return (lhs._node == rhs._node);
+            return (lhs.node_ == rhs.node_);
         }
 
         friend bool
         operator!=(const self& lhs, const self& rhs) noexcept
         {
-            return (lhs._node != rhs._node);
+            return (lhs.node_ != rhs.node_);
         }
     };
 } // namespace detail
@@ -99,61 +99,75 @@ public:
     using const_reference = const T&;
     using iterator        = detail::List_iterator<T>;
     using node            = struct detail::node<T>;
-    //using node_ptr        = node*;
 
 private:
 
-    node* first;
-    node* last;
-    size_type _size = 0;
+    node* first_;
+    node* last_;
+    size_type size_;
 
-public:    
-    explicit List() : first(), last() { }
-
-    explicit List(size_type _size) noexcept : List(_size, value_type{} ) { }
-
-    explicit List(size_type _size, value_type init) noexcept : _size(_size)
+public:
+    explicit List(): size_(0)
     {
-        if(_size == 0){
-            first = last = nullptr;
+        first_ = last_ = nullptr;
+    }
+
+    explicit List(size_type size_) noexcept : List(size_, value_type{} ) { }
+
+    explicit List(size_type size_, value_type init) noexcept
+    {
+        if(size_ == 0){
+            first_ = last_ = nullptr;
         } else {
-            first = new node(init);
-            node* curr = first;
-            curr->next = new node(init);
-            for(size_type i = 0; i < _size; ++i) {
+            first_ = new node(init);
+            node* curr = first_;
+            for(size_type i = 0; i < size_; ++i) {
                 curr->next = new node(init);
                 auto tmp = curr;
                 curr = curr->next;
                 curr->prev = tmp;
             }
-            last = curr;
+            last_ = curr;
         }
+        // de rezolvat linkurile
+        link_head_last();
     }
 
-    void push_back(T x)
+    void push_back(const_reference x)
     {
-        ++_size;
-        if(first == nullptr){
-            first = new node(x);
-            last = first;
+        ++size_;
+        node* tmp = new node(x);
+        if(first_ == nullptr){
+            first_ = last_ = tmp;
+            link_head_last();
         } else {
-            node* new_node = new node(x, nullptr, last);
-            last->next = new_node;
-            last = new_node;
+            last_ = node_insert_after(last_, tmp);
         }
     }
 
     size_type
     size() const noexcept
-    { return _size; }
+    { return this->size_; }
 
     iterator
     begin() const noexcept
-    { return iterator(this->first); }
+    { return iterator(this->first_); }
 
     iterator
     end() const noexcept
-    { return iterator(this->last); }
+    { return iterator(this->last_); }
+
+    reference
+    front () noexcept
+    { return *begin(); }
+
+    reference
+    back() noexcept
+    { return *end(); }
+
+    bool
+    empty() const noexcept
+    { return this->first_ == this->last_; }
 
     friend std::istream& operator>>(std::istream& stream, List<T>& _this)
     {
@@ -166,14 +180,43 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream, List<T>& _this)
     {
-        stream << "[";
-        auto elem = _this.begin();
-        const auto last = --_this.end();
-        for(;elem != last; ++elem){
-            stream << *elem << ", ";
+        // test pt link
+        for(auto e: _this){
+            stream << e << " ";
         }
-        stream << *++elem << "]\n";
-        return stream;
+        //stream << _this.back();
+        /*
+        if(!_this.empty()){
+            stream << "[";
+            auto elem = _this.begin();
+            const auto last_ = --_this.end();
+            for(;elem != last_; ++elem){
+                stream << *elem << ", ";
+            }
+            stream << *++elem << "]\n";
+            return stream;
+        } else {
+            stream << "[]";
+        }*/
+    }
+private:
+
+    // before A <---> C
+    // after  A <---> B <---> C
+    // return B
+    node* node_insert_after(node* pos1, node* tmp){
+        node* pos3 = pos1->next;
+        tmp->prev = pos1;
+        tmp->next = pos3;
+        pos1->next = tmp;
+        pos3->prev = tmp;
+        return tmp;
+    }
+
+    void link_head_last(){
+        first_->next = last_;
+        first_->prev = last_;
+        last_->next = first_;
+        last_->prev = first_;
     }
 };
-
