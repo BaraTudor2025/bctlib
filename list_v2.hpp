@@ -1,7 +1,7 @@
 #pragma once
 #include <iosfwd>   // for stream operators
 #include <stddef.h> // for ptrdiff_t
-#include <memory>
+#include <memory>   // for unique_ptr
 
 namespace detail
 {
@@ -9,7 +9,7 @@ namespace detail
     template <typename T>
     struct node {
         T data;
-        std::unique_ptr<T> next;
+        std::unique_ptr<node> next;
         node* prev;
         node()
             : next(nullptr)
@@ -18,7 +18,7 @@ namespace detail
             : data(data)
             , next(nullptr)
             , prev(nullptr) { }
-        node(T data, std::unique_ptr<T> next, node* prev)
+        node(T data, std::unique_ptr<node> next, node* prev)
             : data(data)
             , next(next)
             , prev(prev) { }
@@ -33,7 +33,7 @@ namespace detail
         using pointer           = T*;
         using node              = struct node<T>;
         using difference_type   = ptrdiff_t;
-        using self              = list_iterator<T>;
+        using self              = const_list_iterator<T>;
 
         node* node_;
 
@@ -41,12 +41,83 @@ namespace detail
         explicit list_iterator(node* node_) : node_(node_) { }
 
         reference
-        operator*() const noexcept
+        operator*() noexcept
         {
             return node_->data;
         }
 
         pointer
+        operator->() noexcept
+        {
+            return &node_->data;
+        }
+
+        self&
+        operator++() noexcept
+        {
+            node_ = node_->next;
+            return *this;
+        }
+
+        self
+        operator++(int) noexcept
+        {
+            self tmp = *this;
+            node_ = node_->next;
+            return tmp;
+        }
+
+        self&
+        operator--() noexcept
+        {
+            node_ = node_->prev;
+            return *this;
+        }
+
+        self
+        operator--(int) noexcept
+        {
+            self tmp = *this;
+            node_ = node_->prev;
+            return tmp;
+        }
+
+        friend bool
+        operator==(const self& lhs, const self& rhs) noexcept
+        {
+            return (lhs.node_ == rhs.node_);
+        }
+
+        friend bool
+        operator!=(const self& lhs, const self& rhs) noexcept
+        {
+            return (lhs.node_ != rhs.node_);
+        }
+    };
+   
+    template <typename T>
+    class const_list_iterator {
+    public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type        = T;
+        using const_reference   = const T&;
+        using const_pointer     = const T*;
+        using node              = struct node<T>;
+        using difference_type   = ptrdiff_t;
+        using self              = const_list_iterator<T>;
+
+        node* node_;
+
+        explicit const_list_iterator() : node_() { }
+        explicit const_list_iterator(node* node_) : node_(node_) { }
+
+        const_reference
+        operator*() const noexcept
+        {
+            return node_->data;
+        }
+
+        const_pointer
         operator->() const noexcept
         {
             return &node_->data;
@@ -94,6 +165,7 @@ namespace detail
             return (lhs.node_ != rhs.node_);
         }
     };
+    
 } // namespace detail
 
 template <typename T>
@@ -118,7 +190,8 @@ private:
 public:
     explicit List(): size_(0)
     {
-        link_head_and_last();
+        node_.next = &node_;
+        node_.prev = &node_;
     }
 
     explicit List(size_type size_) noexcept : List(size_, value_type{} ) { }
@@ -128,7 +201,7 @@ public:
         if(size_ == 0){
             List();
         } else {
-            node_.next = std::make_shared<node>(init);
+            node_.next = std::make_unique<node>(init);
             node* curr = node_;
             for(size_type i = 0; i < size_; ++i) {
                 curr->next = new node(i+1);
@@ -143,7 +216,7 @@ public:
     void push_back(const_reference x)
     {
         ++size_;
-        auto tmp = std::make_shared<node>(x);
+        auto tmp = std::make_unique<node>(x);
         if(this->empty()){
 
         } else {
@@ -204,12 +277,11 @@ public:
         return stream;
     }
 
-    friend std::ostream& operator<<(std::ostream& stream, List<T>& _this)
+    friend std::ostream& operator<<(std::ostream& stream, const List<T>& _this)
     {
-        for(auto e: _this){
+        for(const auto& e: _this){
             stream << e << " ";
         }
-        //stream << _this.back();
         /*
         if(!_this.empty()){
             stream << "[";
@@ -228,18 +300,12 @@ private:
 
     // before A <---> C
     // after  A <---> B <---> C
-    // return B
-    node* node_insert_after(node* pos1, node* tmp){
-        node* pos3 = pos1->next;
+    void node_insert_after(node* pos1, node* tmp){
+        auto pos3 = pos1->next;
         tmp->prev = pos1;
         tmp->next = pos3;
         pos1->next = tmp;
         pos3->prev = tmp;
-        return tmp;
     }
 
-    void link_head_and_last(){
-        node_.next = &node_;
-        node_.prev = &node_;
-    }
 };
