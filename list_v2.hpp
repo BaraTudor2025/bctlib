@@ -33,7 +33,7 @@ namespace detail
         using pointer           = T*;
         using node              = struct node<T>;
         using difference_type   = ptrdiff_t;
-        using self              = const_list_iterator<T>;
+        using self              = list_iterator<T>;
 
         node* node_;
 
