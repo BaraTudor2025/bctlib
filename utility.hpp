@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <vector>
+#include <random>
 #include <numeric>
 
 inline namespace util

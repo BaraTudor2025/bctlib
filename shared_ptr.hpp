@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <string>
 
@@ -34,6 +36,7 @@ class reference_counter {
     int get() { return count_; }
 };
 
+// TODO: de implementat move ctor si op=
 template <typename T>
 class shared_ptr {
     T* ptr_;
@@ -92,12 +95,12 @@ shared_ptr<T> make_shared(Args&&... args) {
     return shared_ptr<T>(obj);
 }
 
-void f(shared_ptr<int> p) {
-    p = make_shared<int>(8);
-}
-
-int main() {
-    auto ptr = make_shared<int>(4);
-    f(ptr);
-    std::cout << "plm\n";
-}
+// void f(shared_ptr<int> p) {
+//     p = make_shared<int>(8);
+// }
+//
+// int main() {
+//     auto ptr = make_shared<int>(4);
+//     f(ptr);
+//     std::cout << "plm\n";
+// }

@@ -4,13 +4,16 @@
 #pragma once
 
 #include <algorithm>
-#include <fstream>
-#include <functional>
+// #include <functional>
+// #include <fstream>
+// #include <iostream>
 #include <initializer_list>
+#include <cstddef>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <vector>
+#include "alg.hpp"
+#include "utility.hpp"
 
 namespace {
 template <typename>

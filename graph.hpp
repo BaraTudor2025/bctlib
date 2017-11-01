@@ -84,10 +84,35 @@ public:
 
 	int grade(int node) const
 	{
-		// TODO: de optimizat
-		return adjacentNodes(node).size();
+		int counter = 0;
+		int group_pos = group_position(node);
+
+		// count the adjacent nodes in node's group
+		for (int i = 1; i <= node; i++)
+			if (data[group_pos + i - 1])
+				couter++;
+
+		/* with starting index 1 */
+ 		// count how many times node appears in the next groups
+		// pos: advance to the next group and to node's position in group
+		for (int curr_group = node,  pos = group_pos + curr_group + node - 1;
+			 curr_group < groups;
+			 curr_group ++, pos += curr_group)
+			if (data[pos])
+				couter++;
+
+		/* with starting index 0, just in case */
+		/*
+		for (int curr_group = node + 1, pos = group_pos + curr_group + node;
+			 curr_group < groups;
+			 curr_group ++, pos += curr_group)
+			if (data[pos])
+				couter++;
+		*/
+		return nodes;
 	}
 
+private:
 	const int groups;
 	std::vector<bool> data; // for debug use deque
 
