@@ -62,7 +62,7 @@ public:
 			if (data[group_pos + i - 1])
 				nodes.push_back(i);
 		
-		/* with index 0 */
+		/* with starting index 1 */
  		// count how many times node appears in the next groups
 		// pos: advance to the next group and to node's position in group
 		for (int curr_group = node,  pos = group_pos + curr_group + node - 1;
@@ -71,7 +71,7 @@ public:
 			if (data[pos])
 				nodes.push_back(curr_group + 1);
 
-		/* with index 0 */
+		/* with starting index 0, just in case */
 		/*
 		for (int curr_group = node + 1, pos = group_pos + curr_group + node;
 			 curr_group < groups;
