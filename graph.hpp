@@ -90,7 +90,7 @@ public:
 		// count the adjacent nodes in node's group
 		for (int i = 1; i <= node; i++)
 			if (data[group_pos + i - 1])
-				couter++;
+				counter++;
 
 		/* with starting index 1 */
  		// count how many times node appears in the next groups
@@ -99,7 +99,7 @@ public:
 			 curr_group < groups;
 			 curr_group ++, pos += curr_group)
 			if (data[pos])
-				couter++;
+				counter++;
 
 		/* with starting index 0, just in case */
 		/*
@@ -107,9 +107,9 @@ public:
 			 curr_group < groups;
 			 curr_group ++, pos += curr_group)
 			if (data[pos])
-				couter++;
+				counter++;
 		*/
-		return nodes;
+		return counter;
 	}
 
 private:
