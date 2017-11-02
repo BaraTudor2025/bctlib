@@ -60,10 +60,8 @@ public:
 	{
 		std::vector<int> nodes;
 		nodes.reserve(groups);
-		auto func = [&nodes](int node) {
-                nodes.push_back(node);
-		    };
-        this->iterate(node, func);
+		auto func = [&nodes](int node) { nodes.push_back(node); };
+        	this->iterate(node, func);
 		return nodes;
 	}
 
