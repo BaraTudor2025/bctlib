@@ -37,7 +37,7 @@ public:
 	void make_connection(int node1, int node2)
 	{
 		if (node1 < node2)
-            std::swap(node1, node2);
+            		std::swap(node1, node2);
 		int pos = group_position(node1);
 		data[pos + node2 - 1] = true;
 	}
@@ -52,8 +52,8 @@ public:
 
 	void remove_node(int node)
 	{
-        for(int i=1; i<this->size(); i++)
-            this->cut_connection(i, node);
+        	for(int i=1; i<this->size(); i++)
+            		this->cut_connection(i, node);
 	}
 
 	std::vector<int> adjacent_nodes(int node) const
