@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-using namespace std;
 
 /**
  * Implementaion of memory efficient graph
@@ -23,74 +22,75 @@ public:
 
 	bool operator()(int node, int nodeAdjacent) const
 	{
-		return this->areConnected(node, nodeAdjacent);
+		return this->are_connected(node, nodeAdjacent);
 	}
 
-	bool areConnected(int node, int nodeAdjacent) const
+	bool are_connected(int node, int nodeAdjacent) const
 	{
 		if (node < nodeAdjacent)
-			swap(node, nodeAdjacent);
+			std::swap(node, nodeAdjacent);
 		const int pos = group_position(node);
 		const bool areConnected = data[pos + nodeAdjacent - 1];
 		return areConnected;
 	}
 
-	void makeConnection(int node1, int node2)
+	void make_connection(int node1, int node2)
 	{
 		if (node1 < node2)
-			swap(node1, node2);
+            std::swap(node1, node2);
 		int pos = group_position(node1);
 		data[pos + node2 - 1] = true;
 	}
 
-	void cutConnection(int node1, int node2)
+	void cut_connection(int node1, int node2)
 	{
 		if (node1 < node2)
-			swap(node1, node2);
+			std::swap(node1, node2);
 		int pos = group_position(node1);
 		data[pos + node2 - 1] = false;
 	}
 
-	vector<int> adjacentNodes(int node) const
+	void remove_node(int node)
 	{
-		vector<int> nodes;
+        for(int i=1; i<this->size(); i++)
+            this->cut_connection(i, node);
+	}
+
+	std::vector<int> adjacent_nodes(int node) const
+	{
+		std::vector<int> nodes;
 		nodes.reserve(groups);
-		int group_pos = group_position(node);
-
-		// count the adjacent nodes in node's group
-		for (int i = 1; i <= node; i++)
-			if (data[group_pos + i - 1])
-				nodes.push_back(i);
-		
-		/* with starting index 1 */
- 		// count how many times node appears in the next groups
-		// pos: advance to the next group and to node's position in group
-		for (int curr_group = node,  pos = group_pos + curr_group + node - 1;
-			 curr_group < groups;
-			 curr_group ++, pos += curr_group)
-			if (data[pos])
-				nodes.push_back(curr_group + 1);
-
-		/* with starting index 0, just in case */
-		/*
-		for (int curr_group = node + 1, pos = group_pos + curr_group + node;
-			 curr_group < groups;
-			 curr_group ++, pos += curr_group)
-			if (data[pos])
-				nodes.push_back(curr_group);
-		*/
+		auto func = [&nodes](int node) {
+                nodes.push_back(node);
+		    };
+        this->iterate(node, func);
 		return nodes;
 	}
 
 	int grade(int node) const
 	{
 		int counter = 0;
+		auto func = [&counter](int node) { counter++; };
+		this->iterate(node, func);
+		return counter;
+	}
+
+	bool is_subgraph_of(const GrafNeorientat graf)
+	{
+
+	}
+
+private:
+
+    template <typename F>
+	void iterate(int node, F func) const
+	{
 		int group_pos = group_position(node);
 
 		// count the adjacent nodes in node's group
 		for (int i = 1; i <= node; i++)
 			if (data[group_pos + i - 1])
-				counter++;
+				func(i);
 
 		/* with starting index 1 */
  		// count how many times node appears in the next groups
@@ -99,7 +99,7 @@ public:
 			 curr_group < groups;
 			 curr_group ++, pos += curr_group)
 			if (data[pos])
-				counter++;
+				func(curr_group + 1);
 
 		/* with starting index 0, just in case */
 		/*
@@ -107,12 +107,11 @@ public:
 			 curr_group < groups;
 			 curr_group ++, pos += curr_group)
 			if (data[pos])
-				counter++;
+				func(curr_group, NEXT_GROUPS);
 		*/
-		return counter;
 	}
 
-private:
+    //enum { FIRST_GROUP, NEXT_GROUPS};
 	const int groups;
 	std::vector<bool> data; // for debug use deque
 
